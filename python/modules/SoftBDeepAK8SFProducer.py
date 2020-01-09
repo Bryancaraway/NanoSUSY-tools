@@ -223,7 +223,6 @@ class SoftBDeepAK8SFProducer(Module):
             return np.zeros(len(fatjet["pt"]))
 
 
-
     def analyze(self, event):
         """process event, return True (go to next module) or False (fail, go to next event)"""
         isvs    = Collection(event, "SB")
