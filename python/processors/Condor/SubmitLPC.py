@@ -17,7 +17,8 @@ from collections import defaultdict
 from multiprocessing import Pool
 from itertools import izip_longest
 
-DelExe    = '../Stop0l_postpost.py'
+#DelExe    = '../Stop0l_postpost.py' # I dont really know what this does?
+DelExe    = '../Stop0l_postproc.py'
 tempdir = '/uscmst1b_scratch/lpc1/3DayLifetime/%s/TestCondor/'  % getpass.getuser()
 ShortProjectName = 'PostProcess'
 VersionNumber = '_v7'
@@ -203,6 +204,10 @@ def my_process(args):
         Tarfiles+= npro
         NewNpro[key] = nque
 
+    site_dict = {'lpc'   : 'root://cmseos.fnal.gov/',
+                 'kodiak': 'gsiftp://kodiak-se.baylor.edu/',
+                 ''      : ''}
+
     Tarfiles.append(os.path.abspath(DelExe))
     tarballname ="%s/%s.tar.gz" % (tempdir, ProjectName)
     with tarfile.open(tarballname, "w:gz", dereference=True) as tar:
@@ -217,7 +222,8 @@ def my_process(args):
         #define output directory
         if args.outputdir == "": outdir = sample["Outpath__"]
         else: outdir = args.outputdir + "/" + name + "/"
-
+        outdir = site_dict[args.site]+outdir # give the ability to write off-site
+        print(outdir)
         #Update RunExe.csh
         RunHTFile = tempdir + "/" + name + "_RunExe.csh"
         with open(RunHTFile, "wt") as outfile:
@@ -267,6 +273,11 @@ if __name__ == "__main__":
     parser.add_argument('-o', '--outputdir',
         default = "", 
         help = 'Path to the output directory.')
+    parser.add_argument('--site',
+        default = '',
+        help = 'select eos site to store results',
+        required=False,
+        choices = ['lpc','kodiak'])
 
     args = parser.parse_args()
     my_process(args)
